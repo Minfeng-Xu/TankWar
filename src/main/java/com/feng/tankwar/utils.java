@@ -8,4 +8,5 @@ public class utils {
     public static Image getImage(String imageName) {
         return new ImageIcon("assets/images/" + imageName).getImage();
     }
+
 }
