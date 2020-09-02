@@ -1,9 +1,8 @@
 package com.feng.tankwar;
 
-import javax.swing.*;
 import java.awt.*;
 
-public class Wall {
+class Wall {
 
     private int x;
     private int y;
@@ -11,16 +10,24 @@ public class Wall {
     private boolean horizontal;
 
     private int bricks;
+    private final Image brickImage;
 
-    public Wall(int x, int y, boolean horizontal, int bricks) {
+    Wall(int x, int y, boolean horizontal, int bricks) {
+        this.brickImage = utils.getImage("brick.png");
         this.x = x;
         this.y = y;
         this.horizontal = horizontal;
         this.bricks = bricks;
     }
 
-    public void draw(Graphics g) {
-        Image brickImage = utils.getImage("brick.png");
+    Rectangle getRectangle() {
+        return horizontal?
+                new Rectangle(x, y, bricks * brickImage.getWidth(null), brickImage.getHeight(null)):
+                new Rectangle(x, y, brickImage.getWidth(null), bricks*brickImage.getHeight(null));
+    }
+
+
+    void draw(Graphics g) {
         if(horizontal){
             for (int i = 0; i < bricks; i++){
                 g.drawImage(brickImage, x+i*brickImage.getWidth(null), y, null);

@@ -3,9 +3,8 @@ package com.feng.tankwar;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
-
 @SuppressWarnings("all")
-public class Tank {
+class Tank {
 
     private int x;
     private int y;
@@ -14,11 +13,11 @@ public class Tank {
 
     private Direction direction;
 
-    public Tank(int x, int y, Direction direction) {
+    Tank(int x, int y, Direction direction) {
         this(x, y, false, direction);
     }
 
-    public Tank(int x, int y, boolean enemy, Direction direction) {
+    Tank(int x, int y, boolean enemy, Direction direction) {
         this.x = x;
         this.y = y;
         this.enemy = enemy;
@@ -40,7 +39,7 @@ public class Tank {
         return null;
     }
 
-    void move() {
+    private void move() {
         if(this.stopped) return;
         switch (direction) {
             case UP: y-=5; break;
@@ -55,18 +54,41 @@ public class Tank {
     }
 
     void draw(Graphics g) {
+        int oldX = x;
+        int oldY = y;
         this.determineDirection();
         this.move();
         if(x < 0) x = 0;
         else if (x>800 - getImage().getWidth(null)) x=800 - getImage().getWidth(null);
         if(y < 0) y = 0;
         else if (y> 600 - getImage().getHeight(null)) y = 600 - getImage().getHeight(null);
+        Rectangle rec = this.getRectangle();
+        for(Wall wall : GameClient.getInstance().getWalls()) {
+            if(rec.intersects(wall.getRectangle())){
+                x = oldX;
+                y = oldY;
+                break;
+            }
+        }
+        for (Tank enemy: GameClient.getInstance().getEnemyTanks()){
+            if(rec.intersects(enemy.getRectangle())){
+                x = oldX;
+                y = oldY;
+                break;
+            }
+        }
+
         g.drawImage(this.getImage(), this.x, this.y, null );
     }
 
+    Rectangle getRectangle() {
+        return new Rectangle(x,y, getImage().getWidth(null), getImage().getHeight(null));
+    }
+
+
     private boolean up, down, left, right;
 
-    public void keyPressed(KeyEvent e) {
+    void keyPressed(KeyEvent e) {
         switch (e.getKeyCode()) {
             case KeyEvent.VK_UP: up = true; break;
             case KeyEvent.VK_DOWN: down = true; break;
@@ -78,9 +100,10 @@ public class Tank {
 
     private boolean stopped;
 
-    private void determineDirection() {
-        if(!up && !left && !down && !right) this.stopped = true;
-        else {
+    void determineDirection() {
+        if(!up && !left && !down && !right) {
+            this.stopped = true;
+        } else {
             this.stopped = false;
             if (up && left && !down && !right) this.direction = Direction.UPLEFT;
             else if (up && !left && !down && right) this.direction = Direction.UPRIGHT;
@@ -104,19 +127,5 @@ public class Tank {
         this.determineDirection();
     }
 
-    public int getX() {
-        return x;
-    }
 
-    public void setX(int x) {
-        this.x = x;
-    }
-
-    public int getY() {
-        return y;
-    }
-
-    public void setY(int y) {
-        this.y = y;
-    }
 }
