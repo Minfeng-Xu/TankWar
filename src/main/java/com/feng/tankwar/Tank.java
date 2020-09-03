@@ -69,7 +69,10 @@ class Tank {
     void draw(Graphics g) {
 
         int oldX = x; int oldY = y;
-        this.determineDirection();
+        if(!this.enemy) {
+            this.determineDirection();
+        }
+
         this.move();
         if(x < 0) x = 0;
         else if (x>800 - getImage().getWidth(null)) x=800 - getImage().getWidth(null);
@@ -84,11 +87,24 @@ class Tank {
             }
         }
         for (Tank enemy: GameClient.getInstance().getEnemyTanks()){
-            if(rec.intersects(enemy.getRectangle())){
+            if(enemy != this && rec.intersects(enemy.getRectangle())){
                 x = oldX;
                 y = oldY;
                 break;
             }
+        }
+
+        if( this.enemy && rec.intersects(
+                GameClient.getInstance().getPlayerTank().getRectangle())) {
+            x = oldX;
+            y = oldY;
+        }
+        if(!this.enemy) {
+            g.setColor(Color.WHITE);
+            g.fillRect(x, y - 10, this.getImage().getWidth(null), 10);
+            g.setColor(Color.RED);
+            int width = hp * this.getImage().getWidth(null) / 100;
+            g.fillRect(x, y -10, width, 10);
         }
 
         g.drawImage(this.getImage(), this.x, this.y, null );
@@ -109,6 +125,7 @@ class Tank {
             case KeyEvent.VK_RIGHT: right = true; break;
             case KeyEvent.VK_F: fire(); break;
             case KeyEvent.VK_A: superFire(); break;
+            case KeyEvent.VK_R: GameClient.getInstance().restart(); break;
         }
 
     }
@@ -163,5 +180,19 @@ class Tank {
         this.determineDirection();
     }
 
+    private final Random random = new Random();
 
+    private int step = random.nextInt(12) + 3;
+
+    public void actRandomly() {
+        Direction[] dirs = Direction.values();
+        if (step == 0) {
+            step = random.nextInt(12) + 3;
+            this.direction = dirs[random.nextInt(dirs.length)];
+            if(random.nextBoolean()) {
+                this.fire();
+            }
+        }
+        step--;
+    }
 }

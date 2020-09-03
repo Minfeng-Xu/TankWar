@@ -59,7 +59,7 @@ class Missile {
             if(rectangle.intersects(playerTank.getRectangle())) {
                 addExplosion();
                 playerTank.setHp(playerTank.getHp() - 20);
-                if(playerTank.getHp() < 0) {
+                if(playerTank.getHp() <= 0) {
                     playerTank.setLive(false);
                 }
                 this.setLive(false);
