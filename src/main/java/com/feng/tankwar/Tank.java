@@ -15,7 +15,32 @@ class Tank {
     private int x;
     private int y;
 
+    private boolean live = true;
+
+    boolean isLive() {
+        return live;
+    }
+
+    void setLive(boolean live) {
+        this.live = live;
+    }
+
     private boolean enemy;
+
+    boolean isEnemy() {
+        return enemy;
+    }
+
+    private int hp = 100;
+
+    public int getHp() {
+        return hp;
+    }
+
+    public void setHp(int hp) {
+        this.hp = hp;
+    }
+
 
     private Direction direction;
 
@@ -42,8 +67,8 @@ class Tank {
     }
 
     void draw(Graphics g) {
-        int oldX = x;
-        int oldY = y;
+
+        int oldX = x; int oldY = y;
         this.determineDirection();
         this.move();
         if(x < 0) x = 0;
