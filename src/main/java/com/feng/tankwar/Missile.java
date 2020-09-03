@@ -22,28 +22,18 @@ class Missile {
         this.enemy = enemy;
     }
 
-    Image getImage() {
-        switch (direction) {
-            case UP: return utils.getImage("missileU.gif");
-            case UPLEFT: return utils.getImage("missileLU.gif");
-            case UPRIGHT: return utils.getImage("missileRU.gif");
-            case DOWN: return utils.getImage("missileD.gif");
-            case DOWNLEFT: return utils.getImage("missileLD.gif");
-            case DOWNRIGHT:  return utils.getImage("missileRD.gif");
-            case LEFT: return utils.getImage("missileL.gif");
-            case RIGHT: return utils.getImage("missileR.gif");
-        }
-        return null;
+    private Image getImage() {
+        return direction.getImage("missile");
     }
 
     void move() {
         switch (direction) {
             case UP: y-= Speed; break;
-            case UPLEFT: y-= Speed; x-= Speed; break;
-            case UPRIGHT: y-= Speed; x+= Speed; break;
+            case LEFT_UP: y-= Speed; x-= Speed; break;
+            case RIGHT_UP: y-= Speed; x+= Speed; break;
             case DOWN: y+= Speed; break;
-            case DOWNLEFT: y+= Speed; x-= Speed; break;
-            case DOWNRIGHT: y+= Speed; x+= Speed; break;
+            case LEFT_DOWN: y+= Speed; x-= Speed; break;
+            case RIGHT_DOWN: y+= Speed; x+= Speed; break;
             case LEFT: x-= Speed; break;
             case RIGHT: x+= Speed; break;
         }
