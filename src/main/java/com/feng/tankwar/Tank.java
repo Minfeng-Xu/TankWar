@@ -3,7 +3,6 @@ package com.feng.tankwar;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.io.File;
@@ -12,6 +11,7 @@ import java.util.Random;
 @SuppressWarnings("all")
 class Tank {
 
+    public static final int MOVE_SPEED = 5;
     private int x;
     private int y;
 
@@ -37,16 +37,8 @@ class Tank {
 
     private void move() {
         if(this.stopped) return;
-        switch (direction) {
-            case UP: y-=5; break;
-            case LEFT_UP: y-=5; x-=5; break;
-            case RIGHT_UP: y-=5; x+=5; break;
-            case DOWN: y+=5; break;
-            case LEFT_DOWN: y+=5; x-=5; break;
-            case RIGHT_DOWN: y+=5; x+=5; break;
-            case LEFT: x-=5; break;
-            case RIGHT: x+=5; break;
-        }
+        x += direction.xFactor * MOVE_SPEED;
+        y += direction.yFactor * MOVE_SPEED;
     }
 
     void draw(Graphics g) {

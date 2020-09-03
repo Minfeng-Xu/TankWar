@@ -1,12 +1,11 @@
 package com.feng.tankwar;
 
-import javax.swing.*;
 import java.awt.*;
 
 @SuppressWarnings("all")
 class Missile {
 
-    public static final int Speed = 10;
+    public static final int SPEED = 10;
     private int x;
 
     private int y;
@@ -27,16 +26,8 @@ class Missile {
     }
 
     void move() {
-        switch (direction) {
-            case UP: y-= Speed; break;
-            case LEFT_UP: y-= Speed; x-= Speed; break;
-            case RIGHT_UP: y-= Speed; x+= Speed; break;
-            case DOWN: y+= Speed; break;
-            case LEFT_DOWN: y+= Speed; x-= Speed; break;
-            case RIGHT_DOWN: y+= Speed; x+= Speed; break;
-            case LEFT: x-= Speed; break;
-            case RIGHT: x+= Speed; break;
-        }
+        x += direction.xFactor * SPEED;
+        y += direction.yFactor * SPEED;
     }
 
     void draw(Graphics g) {
