@@ -11,6 +11,10 @@ import java.util.Random;
 @SuppressWarnings("all")
 class Tank {
 
+    Save.Position getPosition() {
+        return new Save.Position(x, y, direction);
+    }
+
     public static final int MOVE_SPEED = 5;
     private int x;
     private int y;
@@ -31,7 +35,9 @@ class Tank {
         return enemy;
     }
 
-    private int hp = 100;
+    private static final int MAX_HP = 100;
+
+    private int hp = MAX_HP;
 
     public int getHp() {
         return hp;
@@ -43,6 +49,11 @@ class Tank {
 
 
     private Direction direction;
+
+
+    Tank(Save.Position position, boolean enemy) {
+        this(position.getX(), position.getY(), enemy, position.getDirection());
+    }
 
     Tank(int x, int y, Direction direction) {
         this(x, y, false, direction);
@@ -74,10 +85,10 @@ class Tank {
         }
 
         this.move();
-        if(x < 0) x = 0;
-        else if (x>800 - getImage().getWidth(null)) x=800 - getImage().getWidth(null);
-        if(y < 0) y = 0;
-        else if (y> 600 - getImage().getHeight(null)) y = 600 - getImage().getHeight(null);
+        if(x < 0) {x = 0;}
+        else if (x>GameClient.WIDTH - getImage().getWidth(null)) x=GameClient.WIDTH - getImage().getWidth(null);
+        if(y < 0) {y = 0;}
+        else if (y> GameClient.HEIGHT - getImage().getHeight(null)) y = GameClient.HEIGHT - getImage().getHeight(null);
         Rectangle rec = this.getRectangle();
         for(Wall wall : GameClient.getInstance().getWalls()) {
             if(rec.intersects(wall.getRectangle())){
@@ -99,36 +110,49 @@ class Tank {
             x = oldX;
             y = oldY;
         }
+
         if(!this.enemy) {
+            Blood blood = GameClient.getInstance().getBlood();
+            if(blood.isLive() && rec.intersects(blood.getRectangle())) {
+                this.hp = MAX_HP;
+                utils.playAudioFile("revive.wav");
+                blood.setLive(false);
+            }
             g.setColor(Color.WHITE);
             g.fillRect(x, y - 10, this.getImage().getWidth(null), 10);
             g.setColor(Color.RED);
-            int width = hp * this.getImage().getWidth(null) / 100;
+            int width = hp * this.getImage().getWidth(null) / MAX_HP;
             g.fillRect(x, y -10, width, 10);
+
+            Image petImage = utils.getImage("pet-camel.gif");
+            g.drawImage(petImage, this.x - petImage.getWidth(null) -DISTANCE_TO_PET, this.y, null);
         }
 
         g.drawImage(this.getImage(), this.x, this.y, null );
     }
 
+    private static final int DISTANCE_TO_PET = 4;
+
     Rectangle getRectangle() {
+        if(enemy) {
+            return new Rectangle(x,y, getImage().getWidth(null), getImage().getHeight(null));
+        } else {
+            Image petImage = utils.getImage("pet-camel.gif");
+            int delta = petImage.getWidth(null) + DISTANCE_TO_PET;
+            return new Rectangle(x - delta, y,
+                    getImage().getWidth(null) + delta, getImage().getHeight(null));
+        }
+
+    }
+
+    Rectangle getRectangeleForHitDetection() {
         return new Rectangle(x,y, getImage().getWidth(null), getImage().getHeight(null));
     }
 
 
     private boolean up, down, left, right;
 
-    void keyPressed(KeyEvent e) {
-        switch (e.getKeyCode()) {
-            case KeyEvent.VK_UP: up = true; break;
-            case KeyEvent.VK_DOWN: down = true; break;
-            case KeyEvent.VK_LEFT: left = true; break;
-            case KeyEvent.VK_RIGHT: right = true; break;
-            case KeyEvent.VK_F: fire(); break;
-            case KeyEvent.VK_A: superFire(); break;
-            case KeyEvent.VK_R: GameClient.getInstance().restart(); break;
-        }
 
-    }
 
     private void fire() {
         Missile missile = new Missile(x + getImage().getWidth(null)/2 -6,
@@ -153,29 +177,43 @@ class Tank {
 
     private boolean stopped;
 
+
+
+    private int code;
+
+
+
     void determineDirection() {
-        if(!up && !left && !down && !right) {
+        Direction newDirection = Direction.get(code);
+        if(newDirection == null) {
             this.stopped = true;
         } else {
+            this.direction = newDirection;
             this.stopped = false;
-            if (up && left && !down && !right) this.direction = Direction.LEFT_UP;
-            else if (up && !left && !down && right) this.direction = Direction.RIGHT_UP;
-            else if (up && !left && !down && !right) this.direction = Direction.UP;
-            else if (!up && left && down && !right) this.direction = Direction.LEFT_DOWN;
-            else if (!up && !left && down && right) this.direction = Direction.RIGHT_DOWN;
-            else if (!up && !left && down && !right) this.direction = Direction.DOWN;
-            else if (!up && left && !down && !right) this.direction = Direction.LEFT;
-            else if (!up && !left && !down && right) this.direction = Direction.RIGHT;
         }
+
+    }
+
+    void keyPressed(KeyEvent e) {
+        switch (e.getKeyCode()) {
+            case KeyEvent.VK_UP: code |= Direction.UP.code; break;
+            case KeyEvent.VK_DOWN: code |= Direction.DOWN.code; break;
+            case KeyEvent.VK_LEFT: code |= Direction.LEFT.code; break;
+            case KeyEvent.VK_RIGHT: code |= Direction.RIGHT.code; break;
+            case KeyEvent.VK_F: fire(); break;
+            case KeyEvent.VK_A: superFire(); break;
+            case KeyEvent.VK_R: GameClient.getInstance().restart(); break;
+        }
+        this.determineDirection();
 
     }
 
     public void keyReleased(KeyEvent e) {
         switch (e.getKeyCode()) {
-            case KeyEvent.VK_UP: up = false; break;
-            case KeyEvent.VK_DOWN: down = false; break;
-            case KeyEvent.VK_LEFT: left = false; break;
-            case KeyEvent.VK_RIGHT: right = false; break;
+            case KeyEvent.VK_UP: code ^= Direction.UP.code; break;
+            case KeyEvent.VK_DOWN: code ^= Direction.DOWN.code; break;
+            case KeyEvent.VK_LEFT: code ^= Direction.LEFT.code; break;
+            case KeyEvent.VK_RIGHT: code ^= Direction.RIGHT.code; break;
         }
         this.determineDirection();
     }
@@ -194,5 +232,9 @@ class Tank {
             }
         }
         step--;
+    }
+
+    boolean isDying() {
+        return this.hp <= MAX_HP *0.2;
     }
 }
